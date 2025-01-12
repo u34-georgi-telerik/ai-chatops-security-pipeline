@@ -195,14 +195,13 @@ jobs:
       - name: Run Snyk security scan (Python with JSON output)
         continue-on-error: true
         run: |
-          snyk test --json || true > snyk_python_report.json
-          if [ -f snyk_python_report.json ]; then
-          cat snyk_python_report.json
-          else
-          echo '{"vulnerabilities":[]}' > snyk_python_report.json
-          fi
+          mkdir -p reports
+          snyk test --json > reports/snyk_python_report.json || echo '{"vulnerabilities":[]}' > reports/snyk_python_report.json
+          python scripts/format_snyk_results.py
+          ls -la  # Debug: List files
+          pwd    # Debug: Show current directory
 
-      # Process Snyk results
+          # Process Snyk results
       - name: Format Snyk results
         run: |
           python scripts/format_snyk_results.py
