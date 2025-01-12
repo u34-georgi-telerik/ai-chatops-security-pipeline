@@ -87,14 +87,6 @@ jobs:
   #          cd app
   #          python -m unittest discover -v
   build:
-    needs:
-      - pre-commit
-      - editorconfig-check
-      - secrets-check
-      - markdown-check
-    #      - code-lint
-    #      - unit-tests
-
     runs-on: ubuntu-latest
 
     steps:
@@ -123,6 +115,14 @@ jobs:
         run: |
           python scripts/ai_code_review.py  # Replace with the script path
   analyze:
+    needs:
+      - pre-commit
+      - editorconfig-check
+      - secrets-check
+      - markdown-check
+    #      - code-lint
+    #      - unit-tests
+
     runs-on: ubuntu-latest
 
     steps:
