@@ -181,7 +181,7 @@ jobs:
           args: |
             test --file=requirements.txt \
             --package-manager=pip \
-            --json=snyk_python_report.json
+            --json > snyk_python_report.json
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
