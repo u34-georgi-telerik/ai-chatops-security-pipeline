@@ -177,20 +177,18 @@ jobs:
       # Install Snyk CLI
       - name: Install Snyk CLI
         run: npm install -g snyk
+        
+      # Authenticate Snyk
+      - name: Authenticate Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk security scan (Python with JSON output)
         continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          snyk test \
-            --file=requirements.txt \
-            --package-manager=pip \
-            --json > snyk_python_report.json
+          snyk test --json > snyk_python_report.json
       - name: Run Snyk security scan (Docker with JSON output)
         continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk container test \
             my-application:latest \
