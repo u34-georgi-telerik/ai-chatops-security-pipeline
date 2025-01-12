@@ -175,25 +175,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run Snyk to check for vulnerabilities
+      - name: Run Snyk to check for vulnerabilities (Python)
         uses: snyk/actions/python@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        # Run Snyk security scan for Python dependencies
-      - name: Run Snyk security scan (Python)
+      - name: Run Snyk security scan (Python with JSON output)
         run: |
           snyk test \
-          --file=requirements.txt \
-          --package-manager=pip \
-          --json > snyk_python_report.json
-
-    # Run Snyk security scan on Docker image
-      - name: Run Snyk security scan (Docker)
+            --file=requirements.txt \
+            --package-manager=pip \
+            --json=snyk_python_report.json
+      - name: Run Snyk security scan (Docker with JSON output)
         run: |
           snyk container test \
-          my-application:latest \
-          --json > snyk_docker_report.json
+            my-application:latest \
+            --json=snyk_docker_report.json
 
       # Process Snyk results
       - name: Format Snyk results
