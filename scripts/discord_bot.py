@@ -43,3 +43,22 @@ async def analyze(ctx, branch: str):
         await ctx.send(f"Failed to trigger workflow: {response.status_code} - {response.text}")
 
 bot.run(TOKEN)
+
+async def send_snyk_results(channel):
+    if not os.path.exists("snyk_summary.txt"):
+        await channel.send("No Snyk scan results available.")
+        return
+
+    with open("snyk_summary.txt", "r") as file:
+        snyk_summary = file.read()
+
+    await channel.send(f"```\n{snyk_summary}\n```")
+
+@client.event
+async def on_message(message):
+    if message.content.startswith("/analyze"):
+        await message.channel.send("Running Snyk analysis...")
+        # Trigger the pipeline (as before)
+        # After the pipeline completes:
+        await send_snyk_results(message.channel)
+
