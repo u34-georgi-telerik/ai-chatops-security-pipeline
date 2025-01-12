@@ -23,7 +23,7 @@ def format_snyk_report(file_path, scan_type):
 
 if __name__ == "__main__":
     python_report = format_snyk_report("snyk_python_report.json", "Python Dependencies")
-    #docker_report = format_snyk_report("snyk_docker_report.json", "Docker Image")
+    docker_report = format_snyk_report("snyk_docker_report.json", "Docker Image")
 
     with open("snyk_summary.txt", "w") as summary_file:
         summary_file.write(python_report + "\n" + docker_report)
