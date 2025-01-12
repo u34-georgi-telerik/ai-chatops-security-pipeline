@@ -1,10 +1,9 @@
 import discord
-from discord.ext import commands
+from discord import app_commands
 import os
 import requests
 import asyncio
 from dotenv import load_dotenv
-import time
 
 # Load environment variables
 load_dotenv()
@@ -17,7 +16,17 @@ REPO_NAME = "ai-chatops-security-pipeline"
 # Set up the bot with minimal intents
 intents = discord.Intents.default()
 intents.messages = True
-bot = commands.Bot(command_prefix="/", intents=intents)
+
+# Create a new client
+class Bot(discord.Client):
+    def __init__(self):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
+    async def setup_hook(self):
+        await self.tree.sync()
+
+client = Bot()
 
 def get_workflow_status(run_id):
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/runs/{run_id}"
@@ -41,17 +50,11 @@ def get_workflow_jobs(run_id):
         raise Exception(f"Failed to get workflow jobs: {response.status_code} - {response.text}")
     return response.json()
 
-@bot.event
+@client.event
 async def on_ready():
-    print(f"Bot is ready! Logged in as {bot.user}")
-    
-    try:
-        command = await bot.tree.sync()
-        print(f"Slash commands synced: {command}")
-    except Exception as e:
-        print(f"Error syncing commands: {e}")
+    print(f"Bot is ready! Logged in as {client.user}")
 
-@bot.tree.command(name="analyze", description="Analyze a branch")
+@client.tree.command(name="analyze", description="Analyze a branch")
 async def analyze(interaction: discord.Interaction, branch: str):
     try:
         await interaction.response.send_message(f"Triggering analysis for branch: {branch}")
@@ -91,7 +94,7 @@ async def analyze(interaction: discord.Interaction, branch: str):
             await interaction.followup.send("Waiting for the Snyk scan results... This may take a few minutes.")
 
             # Poll the GitHub Actions API to check the workflow status
-            max_retries = 40  # Increased max retries
+            max_retries = 40
             retry_count = 0
             snyk_job_completed = False
             
@@ -103,7 +106,7 @@ async def analyze(interaction: discord.Interaction, branch: str):
                     # Check specific job status
                     jobs = get_workflow_jobs(run_id)
                     for job in jobs.get('jobs', []):
-                        if job['name'] == 'snyk':  # Check specifically for the Snyk job
+                        if job['name'] == 'snyk':
                             if job['status'] == 'completed':
                                 if job['conclusion'] == 'success':
                                     snyk_job_completed = True
@@ -113,14 +116,13 @@ async def analyze(interaction: discord.Interaction, branch: str):
                                     return
 
                     if snyk_job_completed:
-                        # Wait additional time for file system operations to complete
                         await asyncio.sleep(10)
                         await interaction.followup.send("Snyk scan completed. Fetching results...")
                         await send_snyk_results(interaction)
                         break
                     
                     retry_count += 1
-                    await asyncio.sleep(15)  # Check every 15 seconds
+                    await asyncio.sleep(15)
                     
                 except Exception as e:
                     await interaction.followup.send(f"Error checking workflow status: {str(e)}")
@@ -140,7 +142,6 @@ async def send_snyk_results(interaction):
     
     while retry_count < max_retries:
         try:
-            # Check both possible locations for the file
             possible_paths = [
                 "snyk_summary.txt",
                 "../../snyk_summary.txt",
@@ -183,4 +184,4 @@ async def send_snyk_results(interaction):
             await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    bot.run(TOKEN)
+    client.run(TOKEN)
