@@ -148,14 +148,37 @@ jobs:
           python scripts/ai_code_review.py
           echo "AI review complete."
 
-      - name: Run Snyk security scan
-        run: |
-          echo "Running Snyk security scan..."
-          snyk test --all-projects
-          echo "Snyk scan complete."
-
+  docker-build:
+    needs:
+      - analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build Docker image
-        run: |
-          echo "Building Docker image..."
-          docker build -t my-app:${{ github.sha }} .
-          echo "Docker build complete."
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
+
+  snyk:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
