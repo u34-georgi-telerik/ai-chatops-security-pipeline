@@ -1,7 +1,7 @@
 #ansible==10.3.0
 ansible-compat==24.9.1
 ansible-core==2.15.12
-ansible-lint==24.9.2
+ansible-lint==6.22.2
 blinker==1.6.3 ; python_version >= "3.10" and python_version < "4.0"
 click==8.1.7 ; python_version >= "3.10" and python_version < "4.0"
 colorama==0.4.6 ; python_version >= "3.10" and python_version < "4.0" and platform_system == "Windows"
