@@ -135,3 +135,4 @@ jobs:
           echo "Building Docker image..."
           docker build -t my-app:${{ github.sha }} .
           echo "Docker build complete."
+          
