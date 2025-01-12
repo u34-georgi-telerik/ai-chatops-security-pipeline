@@ -24,20 +24,20 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files
 
-#  editorconfig-check:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Check .editorconfig exists
-#        run: |
-#          if [ ! -f .editorconfig ]; then
-#            echo ".editorconfig file not found in root directory"
-#            exit 1
-#          fi
-#      - name: Install editorconfig-checker
-#        run: |
-#          npm install -g editorconfig-checker
-#          editorconfig-checker
+  #  editorconfig-check:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #      - name: Check .editorconfig exists
+  #        run: |
+  #          if [ ! -f .editorconfig ]; then
+  #            echo ".editorconfig file not found in root directory"
+  #            exit 1
+  #          fi
+  #      - name: Install editorconfig-checker
+  #        run: |
+  #          npm install -g editorconfig-checker
+  #          editorconfig-checker
 
   secrets-check:
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
   analyze:
     needs:
       - pre-commit
-    #  - editorconfig-check
+      #  - editorconfig-check
       - secrets-check
       - markdown-check
       - build
@@ -132,11 +132,19 @@ jobs:
         with:
           ref: ${{ github.event.ref }} # Use the branch specified during trigger
 
+      - name: Add dependencies for openai
+        run: |
+          echo "Installing AI dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Set the OPENAI_API_KEY environment variable
+      - name: Set OpenAI API Key
+        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+
       - name: Run AI code review
         run: |
           echo "Running AI code review..."
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
           python scripts/ai_code_review.py
           echo "AI review complete."
 
