@@ -1,0 +1,41 @@
+# The workflow_dispatch event allows you to manually trigger the workflow.
+# The inputs section defines a required branch parameter, defaulting to main.
+# Each step in the jobs section performs a specific task (e.g., code checkout, AI review, Snyk scan).
+
+name: AI-Enhanced ChatOps Security Pipeline
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+  inputs:
+    branch:
+      description: "Branch to analyze"
+      required: true
+      default: "main"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }} # Use the branch specified during trigger
+
+      - name: Run AI code review
+        run: |
+          echo "Running AI code review..."
+          # Placeholder for AI integration logic
+          echo "AI review complete."
+
+      - name: Run Snyk security scan
+        run: |
+          echo "Running Snyk security scan..."
+          snyk test --all-projects
+          echo "Snyk scan complete."
+
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build -t my-app:${{ github.sha }} .
+          echo "Docker build complete."
