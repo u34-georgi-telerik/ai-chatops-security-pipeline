@@ -20,7 +20,7 @@ jobs:
       - name: Run AI code review
         run: |
           echo "Running AI code review..."
-          # Placeholder for AI integration logic
+          python scripts/ai_code_review.py
           echo "AI review complete."
 
       - name: Run Snyk security scan
