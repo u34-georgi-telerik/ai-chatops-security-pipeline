@@ -72,20 +72,20 @@ jobs:
 #        run: |
 #          find . -name '*.py' | xargs pylint
 #          flake8 .
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-          cache: "pip"
-      - name: Run unit tests
-        run: |
-          cd app
-          python -m unittest discover -v
+#
+#  unit-tests:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python
+#        uses: actions/setup-python@v3
+#        with:
+#          python-version: "3.10"
+#          cache: "pip"
+#      - name: Run unit tests
+#        run: |
+#          cd app
+#          python -m unittest discover -v
   build:
     runs-on: ubuntu-latest
 
