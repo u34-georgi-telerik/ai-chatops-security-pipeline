@@ -196,7 +196,8 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports
-          snyk test --json > reports/snyk_python_report.json || echo '{"vulnerabilities":[]}' > reports/snyk_python_report.json
+          snyk test --json > reports/snyk_python_report.json \
+          || echo '{"vulnerabilities":[]}' > reports/snyk_python_report.json
           python scripts/format_snyk_results.py
           ls -la  # Debug: List files
           pwd    # Debug: Show current directory
