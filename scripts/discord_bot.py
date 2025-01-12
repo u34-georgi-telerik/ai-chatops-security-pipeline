@@ -31,11 +31,8 @@ async def analyze(ctx, branch: str):
         "Accept": "application/vnd.github+json",
     }
     payload = {
-    "ref": branch,  # Target branch for the workflow
-    "inputs": {
-        "branch": branch  # Matches the input name in the workflow file
+    "ref": branch  # Target branch for the workflow
     }
-}
 
     # Trigger GitHub Actions workflow
     response = requests.post(url, headers=headers, json=payload)

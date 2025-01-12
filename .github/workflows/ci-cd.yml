@@ -6,11 +6,6 @@ name: AI-Enhanced ChatOps Security Pipeline
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow
-  inputs:
-    branch:
-      description: "Branch to analyze"
-      required: true
-      default: "main"
 
 jobs:
   analyze:
@@ -20,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.branch }} # Use the branch specified during trigger
+          ref: ${{ github.event.ref }} # Use the branch specified during trigger
 
       - name: Run AI code review
         run: |
