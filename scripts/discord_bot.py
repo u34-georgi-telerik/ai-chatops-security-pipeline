@@ -49,6 +49,9 @@ async def analyze(ctx, branch: str):
     # Trigger GitHub Actions workflow
     response = requests.post(url, headers=headers, json=payload)
 
+    # Debug logging: Log the GitHub API response
+    print(f"GitHub API response: {response.status_code} - {response.text}")
+
     if response.status_code == 204:
         await ctx.send(f"Workflow triggered successfully for branch: {branch}")
 
