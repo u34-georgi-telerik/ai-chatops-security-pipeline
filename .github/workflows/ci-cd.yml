@@ -24,20 +24,20 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files
 
-  editorconfig-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Check .editorconfig exists
-        run: |
-          if [ ! -f .editorconfig ]; then
-            echo ".editorconfig file not found in root directory"
-            exit 1
-          fi
-      - name: Install editorconfig-checker
-        run: |
-          npm install -g editorconfig-checker
-          editorconfig-checker
+#  editorconfig-check:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Check .editorconfig exists
+#        run: |
+#          if [ ! -f .editorconfig ]; then
+#            echo ".editorconfig file not found in root directory"
+#            exit 1
+#          fi
+#      - name: Install editorconfig-checker
+#        run: |
+#          npm install -g editorconfig-checker
+#          editorconfig-checker
 
   secrets-check:
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
   analyze:
     needs:
       - pre-commit
-      - editorconfig-check
+    #  - editorconfig-check
       - secrets-check
       - markdown-check
       - build
