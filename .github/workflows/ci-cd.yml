@@ -174,7 +174,6 @@ jobs:
     needs: docker-build
     runs-on: ubuntu-latest
     steps:
-      
       # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -184,7 +183,7 @@ jobs:
         run: |
           pwd
           ls -la
-          ls -la scripts/  
+          ls -la scripts/
       # Install Snyk CLI
       - name: Install Snyk CLI
         run: npm install -g snyk
