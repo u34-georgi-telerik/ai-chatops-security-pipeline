@@ -186,12 +186,6 @@ jobs:
         continue-on-error: true
         run: |
           snyk test --json > snyk_python_report.json
-      - name: Run Snyk security scan (Docker with JSON output)
-        continue-on-error: true
-        run: |
-          snyk container test \
-            my-application:latest \
-            --json > snyk_docker_report.json
 
       # Process Snyk results
       - name: Format Snyk results
