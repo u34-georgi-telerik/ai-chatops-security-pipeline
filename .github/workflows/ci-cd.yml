@@ -181,4 +181,4 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test
+          command: test --file=requirements.txt --package-manager=pip
