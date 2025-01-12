@@ -120,6 +120,7 @@ jobs:
       - editorconfig-check
       - secrets-check
       - markdown-check
+      - build
     #      - code-lint
     #      - unit-tests
 
