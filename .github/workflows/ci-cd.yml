@@ -135,8 +135,8 @@ jobs:
       - name: Run AI code review
         run: |
           echo "Running AI code review..."
-          python -m pip install --upgrade pip  # Ensure pip is up-to-date
-          pip install -r requirements.txt  # Reinstall dependencies in the analyze step
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
           python scripts/ai_code_review.py
           echo "AI review complete."
 
