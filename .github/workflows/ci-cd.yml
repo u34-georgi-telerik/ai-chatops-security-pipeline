@@ -149,7 +149,6 @@ jobs:
           echo "AI review complete."
   checkov-scan:
     runs-on: ubuntu-latest
-    # Run in parallel with other security checks
     needs:
       - pre-commit
       - secrets-check
@@ -158,51 +157,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: Run Checkov scan
-        id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
           directory: .
           framework: all
-          output_format: cli,sarif,json
-          output_file_path: checkov-results.sarif,checkov-results.json
+          output_format: sarif
+          output_file_path: checkov-results.sarif
           soft_fail: true
-      
-      # Ensure reports directory exists
-      - name: Ensure reports directory exists
-        run: mkdir -p reports    
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
         with:
-          sarif_file: reports/checkov-results.sarif
+          sarif_file: checkov-results.sarif
           
-      # Format results for easier reading
-      - name: Process Checkov results
-        if: success() || failure()
-        run: |
-          mkdir -p reports
-          if [ -f reports/checkov-results.json ]; then
-            echo "Processing Checkov results..."
-            jq -r '.results.failed_checks[] | "- :warning: \(.check_name): \(.file_path)"' reports/checkov-results.json > reports/checkov-summary.txt
-          else
-            echo "No Checkov results found"
-          fi
-
-      # Add results to the existing security report
-      - name: Combine security reports
-        if: success() || failure()
-        run: |
-          echo "## Checkov Scan Results" >> reports/security_report.md
-          if [ -f reports/checkov-summary.txt ]; then
-            cat reports/checkov-summary.txt >> reports/security_report.md
-          else
-            echo "No infrastructure security issues found" >> reports/security_report.md
-          fi
   docker-build:
     needs:
       - analyze
