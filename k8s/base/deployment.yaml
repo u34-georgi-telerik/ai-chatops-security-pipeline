@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
+        image: germanetza/u34:bb1bdee413a67af2f0231af18f4ca36606674789
         resources:
           limits:
             cpu: "500m"
