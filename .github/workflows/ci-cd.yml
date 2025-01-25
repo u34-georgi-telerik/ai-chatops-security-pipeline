@@ -194,7 +194,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: false
+          push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
@@ -219,6 +219,11 @@ jobs:
           git add k8s/base/deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
           git push
+      - name: Trigger ArgoCD Sync
+        run: |
+         argocd app sync your-app-name \
+          --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
+          --server=${{ secrets.ARGOCD_SERVER }}
   snyk:
     needs: docker-build
     runs-on: ubuntu-latest
