@@ -233,6 +233,8 @@ jobs:
          argocd app sync my-app \
           --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
           --server=https://${{ secrets.ARGOCD_SERVER }}
+      - name: Debug ARGOCD_SERVER
+        run: echo "ARGOCD_SERVER=https://${{ secrets.ARGOCD_SERVER }}" 
   snyk:
     needs: docker-build
     runs-on: ubuntu-latest
