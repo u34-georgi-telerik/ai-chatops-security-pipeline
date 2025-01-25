@@ -205,12 +205,19 @@ jobs:
       - snyk
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      # Install ArgoCD CLI
+      - name: Install ArgoCD CLI
+        run: |
+         curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+         chmod +x /usr/local/bin/argocd
+      # Update Kubernetes manifests with the new image   
       - name: Update Kubernetes manifests
         run: |
           sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}|" k8s/base/deployment.yaml
-          
+      # Commit and push updated manifests    
       - name: Commit and push updated manifests
         run: |
           git config --global user.name 'Georgi Hristov'
@@ -219,6 +226,7 @@ jobs:
           git add k8s/base/deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
           git push
+      # Trigger ArgoCD Sync    
       - name: Trigger ArgoCD Sync
         run: |
          argocd app sync my-app \
