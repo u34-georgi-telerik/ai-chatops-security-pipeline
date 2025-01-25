@@ -150,7 +150,7 @@ jobs:
   checkov-scan:
     runs-on: ubuntu-latest
     # Run in parallel with other security checks
-    needs: 
+    needs:
       - pre-commit
       - secrets-check
       - markdown-check
