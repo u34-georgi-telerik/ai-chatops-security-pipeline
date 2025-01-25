@@ -170,6 +170,10 @@ jobs:
           output_format: cli,sarif,json
           output_file_path: reports/checkov-results.sarif,reports/checkov-results.json
           soft_fail: true
+      
+      # Ensure reports directory exists
+      - name: Ensure reports directory exists
+        run: mkdir -p reports    
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
