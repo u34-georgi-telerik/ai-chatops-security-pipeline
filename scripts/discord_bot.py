@@ -126,6 +126,6 @@ async def send_snyk_results(ctx):
 
 # Add required import
 import asyncio
-
+print(f"Loaded token: {TOKEN}")
 if __name__ == "__main__":
     bot.run(TOKEN)

@@ -1,0 +1,27 @@
+skip-check:
+  - CKV_SECRET_6  # Skips specific checks if needed
+  - CKV_GHA_3     # Skip GitHub Actions runner version check if not needed
+
+download-external-modules: false  # For security
+
+framework:
+  - all           # Scan all frameworks
+  - dockerfile    # Explicitly include Dockerfile scanning
+  - kubernetes    # If you have K8s manifests
+  - github_actions # Scan GitHub Actions workflows
+
+directory:
+  - .
+
+output:
+  - cli
+  - sarif
+  - json
+
+compact: true
+quiet: false
+
+# Skip specific directories if needed
+skip-path:
+  - "tests"
+  - ".github"
