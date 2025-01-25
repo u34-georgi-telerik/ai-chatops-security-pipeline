@@ -227,7 +227,9 @@ jobs:
           git commit -m "Update image to ${{ github.sha }}"
           git push
       # Trigger ArgoCD Sync    
-      
+      - name: Debug ARGOCD_SERVER
+        run: echo "ARGOCD_SERVER=https://${{ secrets.ARGOCD_SERVER }}"
+
       - name: Trigger ArgoCD Sync
         run: |
          argocd app sync my-app \
