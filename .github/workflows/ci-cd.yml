@@ -215,6 +215,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
+          git remote set-url origin https://${{ secrets.GITHUB_PAT_TOKEN }}@github.com/u34-georgi-telerik/ai-chatops-security-pipeline.git
           git add k8s/base/deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
           git push
