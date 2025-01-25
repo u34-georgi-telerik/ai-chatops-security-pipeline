@@ -202,7 +202,7 @@ jobs:
   docker-build:
     needs:
       - analyze
-      - checkov
+      - checkov-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
