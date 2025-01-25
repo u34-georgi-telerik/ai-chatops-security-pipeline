@@ -168,7 +168,7 @@ jobs:
           directory: .
           framework: all
           output_format: cli,sarif,json
-          output_file_path: reports/checkov-results.sarif,reports/checkov-results.json
+          output_file_path: checkov-results.sarif,checkov-results.json
           soft_fail: true
       
       # Ensure reports directory exists
