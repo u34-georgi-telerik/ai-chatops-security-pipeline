@@ -198,7 +198,26 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
-
+  # Deploy to k8s
+  deploy-k8s:
+    needs: 
+      - docker-build
+      - snyk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Update Kubernetes manifests
+        run: |
+          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}|" k8s/base/deployment.yaml
+          
+      - name: Commit and push updated manifests
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add k8s/base/deployment.yaml
+          git commit -m "Update image to ${{ github.sha }}"
+          git push
   snyk:
     needs: docker-build
     runs-on: ubuntu-latest
