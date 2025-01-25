@@ -207,10 +207,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-         token: ${{ secrets.GITHUB_PAT_TOKEN }}
       - name: Update Kubernetes manifests
         run: |
           sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}|" k8s/base/deployment.yaml
