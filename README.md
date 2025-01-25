@@ -81,4 +81,8 @@ Triggered on:
 4. Open pull request
 
 ## License
+<<<<<<< HEAD
 MIT License
+=======
+MIT License
+>>>>>>> 8b6793cd441467ebef4ec523b25b3cb11d1c451a
