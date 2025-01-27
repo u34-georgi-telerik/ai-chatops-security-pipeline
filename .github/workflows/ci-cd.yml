@@ -226,6 +226,9 @@ jobs:
           git commit -m "Update image to ${{ github.sha }}"
           git push
 
+      - name: Debug Connection
+        run: |
+          curl -v https://9d15-85-11-171-166.ngrok-free.app
       - name: Trigger ArgoCD Sync  # Initiates deployment synchronization
         run: |
          argocd app sync my-app \
