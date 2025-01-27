@@ -231,7 +231,7 @@ jobs:
          argocd app sync my-app \
           --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
           --server=https://${{ secrets.ARGOCD_SERVER }} \
-          --port-forward-namespace argocd
+          --port-forward --port-forward-namespace=argocd
 
   # Performs security vulnerability scanning
   snyk:
