@@ -233,7 +233,7 @@ jobs:
         run: |
          argocd app sync my-app \
           --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
-          --server=https://${{ secrets.ARGOCD_SERVER }} \
+          --server=https://9d15-85-11-171-166.ngrok-free.app \
           --insecure
 
   # Performs security vulnerability scanning
