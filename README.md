@@ -1,9 +1,11 @@
 # AI-Enhanced ChatOps Security Pipeline
 
 ## Overview
+
 A comprehensive DevOps pipeline integrating AI-powered code review, security scanning, and automated deployment.
 
 ## Features
+
 - AI-assisted code review
 - Multi-layer security scanning
 - Docker image build
@@ -11,6 +13,7 @@ A comprehensive DevOps pipeline integrating AI-powered code review, security sca
 - ChatOps integration
 
 ## Prerequisites
+
 - Python 3.9+
 - Docker
 - Kubernetes cluster
@@ -21,6 +24,7 @@ A comprehensive DevOps pipeline integrating AI-powered code review, security sca
 ## Setup
 
 ### 1. Repository Configuration
+
 1. Fork the repository
 2. Set up GitHub Secrets:
    - `DOCKERHUB_USERNAME`
@@ -30,6 +34,7 @@ A comprehensive DevOps pipeline integrating AI-powered code review, security sca
    - `SNYK_TOKEN`
 
 ### 2. Local Development
+
 ```bash
 # Clone repository
 git clone https://github.com/YOUR_USERNAME/ai-chatops-security-pipeline.git
@@ -42,12 +47,14 @@ pre-commit install
 ```
 
 ### 3. ArgoCD Installation
+
 ```bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
 ## Workflow Stages
+
 1. Code Commit
 2. Pre-commit Checks
 3. AI Code Review
@@ -59,30 +66,32 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 6. Kubernetes Deployment
 
 ## GitHub Actions Workflow
+
 Triggered on:
+
 - Manual dispatch
 - Pull requests
 - Direct pushes to main branch
 
 ## Security Tools
+
 - Gitleaks
 - Checkov
 - Snyk
 - GitHub CodeQL
 
 ## Observability
+
 - SARIF report generation
 - GitHub Security tab integration
 
 ## Contributing
+
 1. Fork repository
 2. Create feature branch
 3. Commit changes
 4. Open pull request
 
 ## License
-<<<<<<< HEAD
+
 MIT License
-=======
-MIT License
->>>>>>> 8b6793cd441467ebef4ec523b25b3cb11d1c451a
