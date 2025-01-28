@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: germanetza/u34:5c7e571258c47be4b05d88221e93058925529838
+        image: germanetza/u34:da7d63af534471e167f455bbde51ab156d07704d
         resources:
           limits:
             cpu: "500m"
