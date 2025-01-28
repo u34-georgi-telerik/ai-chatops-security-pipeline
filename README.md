@@ -37,7 +37,7 @@ A comprehensive DevOps pipeline integrating AI-powered code review, security sca
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/ai-chatops-security-pipeline.git
+git clone https://github.com/u34-georgi-telerik/ai-chatops-security-pipeline.git
 
 # Install dependencies
 pip install -r requirements.txt
