@@ -106,13 +106,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set OpenAI API Key  # Securely injects OpenAI credentials
-        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-
-      - name: Run AI code review  # Executes AI-powered code review script
-        run: |
-          python scripts/ai_code_review.py
-
   # Performs comprehensive analysis after initial checks
   analyze:
     needs:  # Ensures prerequisite jobs complete successfully
