@@ -56,19 +56,32 @@ jobs:
           pip install -r requirements.txt
 
   # Performs an AI-powered code review
+    # Performs comprehensive analysis after initial checks
   analyze:
-    needs: [pre-commit, secrets-check, markdown-check, build]  # Waits for prior jobs to complete
+    needs:  # Ensures prerequisite jobs complete successfully
+      - pre-commit
+      - secrets-check
+      - markdown-check
+      - build
+
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3  # Checks out the repository for the specific branch
+      - name: Checkout code  # Retrieves specific branch for analysis
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.ref }}
-      - name: Install dependencies for AI analysis
+
+      - name: Add dependencies for openai  # Prepares AI review dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: AI code review
-        run: python scripts/ai_code_review.py
+
+      - name: Set OpenAI API Key  # Securely manages OpenAI credentials
+        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Run AI code review  # Performs detailed AI-powered code analysis
+        run: |
+          python scripts/ai_code_review.py
 
   # Scans infrastructure and IaC files using Checkov
   checkov-scan:
@@ -125,7 +138,7 @@ jobs:
 
   # Deploys the application to a Kubernetes cluster using ArgoCD
   deploy-k8s:
-    needs: [docker-build]  # Waits for the Docker image to be built
+    needs: [snyk-scan]  # Waits for the Snyk scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3  # Checks out the repository code
