@@ -1,256 +1,175 @@
 name: AI-Enhanced ChatOps Security Pipeline
 
-# Allows manual triggering of the workflow with optional parameters
+# This workflow is triggered manually, allowing on-demand execution
 on:
-  workflow_dispatch: # Manual workflow dispatch enables on-demand pipeline execution
+  workflow_dispatch:
+    inputs:
+      trigger:  # Optional input for logging the reason for triggering
+        description: "Reason for triggering the workflow"
+        required: false
 
 jobs:
-  # Pre-commit checks validate code formatting and style before further processing
+  # Runs pre-commit hooks to validate code formatting and style
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2  # Checks out repository code
+      - uses: actions/checkout@v3  # Checks out the repository code
       - uses: actions/setup-python@v3  # Sets up Python environment
         with:
           python-version: "3.10"
           cache: "pip"
-      - name: Install pre-commit  # Installs and configures pre-commit hooks
+      - name: Install and run pre-commit hooks
         run: |
-          python -m pip install pre-commit
-          pre-commit install
-      - name: Run pre-commit  # Runs pre-commit checks on all files
-        run: pre-commit run --all-files
+          pip install pre-commit
+          pre-commit run --all-files
 
-  # Optional: Uncomment if you want to enforce EditorConfig standards
-  #  editorconfig-check:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - name: Check .editorconfig exists  # Validates presence of EditorConfig file
-  #        run: |
-  #          if [ ! -f .editorconfig ]; then
-  #            echo ".editorconfig file not found in root directory"
-  #            exit 1
-  #          fi
-  #      - name: Install editorconfig-checker  # Checks file formatting consistency
-  #        run: |
-  #          npm install -g editorconfig-checker
-  #          editorconfig-checker
-
-  # Scans repository for accidentally committed secrets or credentials
+  # Scans for hardcoded secrets using Gitleaks
   secrets-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Fetches entire git history for comprehensive scanning
-      - name: Check for hardcoded secrets  # Uses Gitleaks to detect potential security risks
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Scan for hardcoded secrets
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Validates Markdown files for formatting and style consistency
+  # Validates Markdown files for proper formatting
   markdown-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Run markdown lint  # Uses markdownlint to enforce Markdown standards
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Run markdown lint
         run: npx markdownlint-cli .
 
-  # Optional: Uncomment for Python code linting
-  #  code-lint:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - name: Set up Python  # Prepares Python environment for linting
-  #        uses: actions/setup-python@v3
-  #        with:
-  #          python-version: "3.10"
-  #          cache: "pip"
-  #      - name: Install linting tools  # Installs Pylint and Flake8 for code quality checks
-  #        run: pip install pylint flake8 flask
-  #      - name: Lint Python code  # Runs static code analysis
-  #        run: |
-  #          find . -name '*.py' | xargs pylint
-  #          flake8 .
-
-  # Optional: Uncomment for running unit tests
-  #  unit-tests:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - name: Set up Python  # Prepares Python environment for testing
-  #        uses: actions/setup-python@v3
-  #        with:
-  #          python-version: "3.10"
-  #          cache: "pip"
-  #      - name: Run unit tests  # Discovers and runs all unit tests
-  #        run: |
-  #          cd app
-  #          python -m unittest discover -v
-
-  # Builds the project and prepares for further processing
+  # Installs dependencies and builds the project
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code  # Retrieves repository code
-        uses: actions/checkout@v2
-
-      - name: Set up Python  # Configures Python environment for build
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - uses: actions/setup-python@v3  # Sets up Python environment
         with:
-          python-version: "3.9"  # Specify your project's Python version
-
-      - name: Install dependencies  # Installs project dependencies
+          python-version: "3.9"
+          cache: "pip"
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
 
-  # Performs comprehensive analysis after initial checks
+  # Performs an AI-powered code review
   analyze:
-    needs:  # Ensures prerequisite jobs complete successfully
-      - pre-commit
-      - secrets-check
-      - markdown-check
-      - build
-
+    needs: [pre-commit, secrets-check, markdown-check, build]  # Waits for prior jobs to complete
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code  # Retrieves specific branch for analysis
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3  # Checks out the repository for the specific branch
         with:
           ref: ${{ github.event.ref }}
-
-      - name: Add dependencies for openai  # Prepares AI review dependencies
+      - name: Install dependencies for AI analysis
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
+      - name: AI code review
+        run: python scripts/ai_code_review.py
 
-      - name: Set OpenAI API Key  # Securely manages OpenAI credentials
-        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-
-      - name: Run AI code review  # Performs detailed AI-powered code analysis
-        run: |
-          python scripts/ai_code_review.py
-
-  # Infrastructure and security scanning using Checkov
+  # Scans infrastructure and IaC files using Checkov
   checkov-scan:
+    needs: [pre-commit, secrets-check, markdown-check, build]  # Depends on earlier validation steps
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    needs:  # Ensures prerequisite jobs complete
-      - pre-commit
-      - secrets-check
-      - markdown-check
-      - build
     steps:
-      - name: Checkout code  # Retrieves repository code
-        uses: actions/checkout@v3
-
-      - name: Run Checkov scan  # Performs comprehensive infrastructure security scanning
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Run Checkov scan
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: .
-          framework: all
-          output_format: sarif
-          output_file_path: checkov-results.sarif
-          soft_fail: true
-
-      - name: Upload SARIF file  # Uploads scan results for GitHub security dashboard
+          directory: .  # Scans the entire repository
+          framework: all  # Checks all supported frameworks
+          output_format: sarif  # Outputs results in SARIF format
+          output_file_path: checkov-results.sarif  # Saves the results to a file
+          soft_fail: true  # Allows the pipeline to continue on failures
+      - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
-        if: success() || failure()
         with:
           sarif_file: checkov-results.sarif
-  
-  # Builds and pushes Docker image to registry
+
+  # Builds and pushes a Docker image to Docker Hub
   docker-build:
-    needs:  # Ensures analysis and scanning jobs complete
-      - analyze
-      - checkov-scan
+    needs: [analyze, checkov-scan]  # Requires analysis and scanning jobs to complete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx  # Configures advanced Docker build capabilities
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to Docker Hub  # Authenticates with Docker registry
-        uses: docker/login-action@v1
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker image  # Builds and pushes Docker image with tags
-        uses: docker/build-push-action@v2
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
-          context: .
-          push: true
+          context: .  # Specifies the build context
+          push: true  # Pushes the image to the registry
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
-
-  # Deploys to Kubernetes cluster using ArgoCD
-  deploy-k8s:
-    needs:   # Ensures Docker build and security scanning complete
-      - docker-build
-      - snyk
+  # Scans the Docker image for vulnerabilities using Snyk
+  snyk-scan:
+    needs: [docker-build]  # Waits for the Docker image to be built
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository  # Retrieves latest code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      - name: Authenticate Snyk
+        run: snyk auth "${{ secrets.SNYK_TOKEN }}"
+      - name: Run Snyk scan
+        run: snyk test
 
-      - name: Install ArgoCD CLI  # Downloads and configures ArgoCD command-line tool
+  # Deploys the application to a Kubernetes cluster using ArgoCD
+  deploy-k8s:
+    needs: [docker-build]  # Waits for the Docker image to be built
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Install ArgoCD CLI
         run: |
-         curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-         chmod +x /usr/local/bin/argocd
-
-      - name: Update Kubernetes manifests  # Updates deployment image to latest version
+          curl -sSL -o /usr/local/bin/argocd \
+            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+      - name: Update Kubernetes manifests with the latest image
         run: |
-          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}|" k8s/base/deployment.yaml
-
-      - name: Commit and push updated manifests  # Commits image update to repository
+          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}|" \
+            k8s/base/deployment.yaml
+      - name: Commit and push updated manifests
         run: |
-          git config --global user.name 'Georgi Hristov'
-          git config --global user.email 'georgi.hristov.u34@learn.telerikacademy.com'
-          git remote set-url origin https://${{ secrets.GITHUB_PAT_TOKEN }}@github.com/u34-georgi-telerik/ai-chatops-security-pipeline.git
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
           git add k8s/base/deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
           git push
-
-      - name: Debug Connection
+      - name: Trigger ArgoCD Sync
         run: |
-          curl -v https://9d15-85-11-171-166.ngrok-free.app
-      - name: Trigger ArgoCD Sync  # Initiates deployment synchronization
-        run: |
-         argocd app sync my-app \
-          --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
-          --server=https://9d15-85-11-171-166.ngrok-free.app \
-          --insecure
+          argocd app sync my-app \
+            --auth-token=${{ secrets.ARGOCD_AUTH_TOKEN }} \
+            --server=https://${{ secrets.ARGOCD_SERVER }} \
+            --insecure
 
-  # Performs security vulnerability scanning
-  snyk:
-    needs: docker-build
+  # Sets up monitoring tools like Grafana and Prometheus
+  monitoring:
+    needs: [deploy-k8s]  # Requires the deployment to Kubernetes to be complete
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository  # Retrieves code for scanning
-        uses: actions/checkout@v3
-
-      - name: Install Snyk CLI  # Installs Snyk security scanning tool
-        run: npm install -g snyk
-
-      - name: Authenticate Snyk  # Authenticates with Snyk service
-        run: snyk auth "${{ secrets.SNYK_TOKEN }}"
-
-      - name: Run Snyk security scan  # Performs vulnerability assessment
-        continue-on-error: true
+      - uses: actions/checkout@v3  # Checks out the repository code
+      - name: Install Helm
         run: |
-          mkdir -p reports
-          snyk test --json > reports/snyk_python_report.json \
-          || echo '{"vulnerabilities":[]}' > reports/snyk_python_report.json
-          python scripts/format_snyk_results.py
-
-      - name: Format Snyk results  # Processes and formats scan results
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Deploy Grafana and Prometheus
         run: |
-          python scripts/format_snyk_results.py
+          helm upgrade --install grafana grafana/grafana \
+            --namespace monitoring --create-namespace
+          helm upgrade --install prometheus prometheus-community/prometheus \
+            --namespace monitoring
+      - name: Verify Monitoring Setup
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana \
+            -n monitoring --timeout=300s
+          kubectl wait --for=condition=ready pod -l app=prometheus \
+            -n monitoring --timeout=300s
