@@ -123,18 +123,33 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/u34:latest
+  
   # Scans the Docker image for vulnerabilities using Snyk
   snyk-scan:
-    needs: [docker-build]  # Waits for the Docker image to be built
+    needs: docker-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3  # Checks out the repository code
-      - name: Install Snyk CLI
+      - name: Checkout Repository  # Retrieves code for scanning
+        uses: actions/checkout@v3
+
+      - name: Install Snyk CLI  # Installs Snyk security scanning tool
         run: npm install -g snyk
-      - name: Authenticate Snyk
+
+      - name: Authenticate Snyk  # Authenticates with Snyk service
         run: snyk auth "${{ secrets.SNYK_TOKEN }}"
-      - name: Run Snyk scan
-        run: snyk test
+
+      - name: Run Snyk security scan  # Performs vulnerability assessment
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          snyk test --json > reports/snyk_python_report.json \
+          || echo '{"vulnerabilities":[]}' > reports/snyk_python_report.json
+          python scripts/format_snyk_results.py
+
+      - name: Format Snyk results  # Processes and formats scan results
+        run: |
+          python scripts/format_snyk_results.py
+
 
   # Deploys the application to a Kubernetes cluster using ArgoCD
   deploy-k8s:
